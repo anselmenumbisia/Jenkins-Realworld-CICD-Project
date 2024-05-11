@@ -50,7 +50,7 @@ pipeline {
     stage ('Checkstyle Code Analysis'){
         steps {
             dir('realworld-cicd-pipeline-project-main/') {
-            sh 'mvn checkstyle:checkstyle'          
+            sh 'mvn checkstyle:checkstyle'
         }
         }
         post {
@@ -59,13 +59,6 @@ pipeline {
             }
         }
     }
-    post {
-            success {
-                echo 'Generated Analysis Result'
-            }
-        }
-    }
-
     stage('SonarQube Inspection') {
         steps {
             dir('realworld-cicd-pipeline-project-main/') {
@@ -73,7 +66,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'SonarQube-Token', variable: 'SONAR_TOKEN')]) {
                 sh """
                 mvn sonar:sonar \
-                -Dsonar.projectKey=JavaWebApp-Project1 \
+                -Dsonar.projectKey=JavaWebApp-Project \
                 -Dsonar.host.url=http://172.31.95.19:9000 \
                 -Dsonar.login=$SONAR_TOKEN
                 """
@@ -82,16 +75,18 @@ pipeline {
             }
         }
     }
-   // stage('SonarQube GateKeeper') {
-      //  steps {
-        //  timeout(time : 1, unit : 'HOURS'){
-         // waitForQualityGate abortPipeline: true
-        //  }
-       //}
-    //}
+/*
+    stage('SonarQube GateKeeper') {
+        steps {
+          timeout(time : 1, unit : 'HOURS'){
+          waitForQualityGate abortPipeline: true
+          }
+       }
+    }
+ */
+	  
     stage("Nexus Artifact Uploader"){
         steps{
-           dir('realworld-cicd-pipeline-project-main/') {
            nexusArtifactUploader(
               nexusVersion: 'nexus3',
               protocol: 'http',
@@ -103,11 +98,10 @@ pipeline {
               artifacts: [
                   [artifactId: 'webapp',
                   classifier: '',
-                  file: "$WORKSPACE/webapp/target/webapp.war",
+                  file: "${WORKSPACE}/webapp/target/webapp.war",
                   type: 'war']
               ]
            )
-        }
         }
     }
     stage('Deploy to Development Env') {
@@ -161,5 +155,4 @@ pipeline {
         message: "*${currentBuild.currentResult}:* Job Name '${env.JOB_NAME}' build ${env.BUILD_NUMBER} \n Build Timestamp: ${env.BUILD_TIMESTAMP} \n Project Workspace: ${env.WORKSPACE} \n More info at: ${env.BUILD_URL}"
     }
   }
-
-
+}
