@@ -6,7 +6,7 @@ def COLOR_MAP = [
 pipeline {
   agent any
   environment {
-    WORKSPACE = "${env.WORKSPACE}/realworld-cicd-pipeline-project-main"
+    WORKSPACE = "${env.WORKSPACE}/Jenkins-Realworld-CICD-Project"
     NEXUS_CREDENTIAL_ID = 'Nexus-Credential'
     //NEXUS_USER = "$NEXUS_CREDS_USR"
     //NEXUS_PASSWORD = "$Nexus-Token"
@@ -22,7 +22,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        dir('realworld-cicd-pipeline-project-main/') {
+        dir('Jenkins-Realworld-CICD-Project/') {
         sh 'mvn clean package'
         }
       }
@@ -35,21 +35,21 @@ pipeline {
     }
     stage('Unit Test'){
         steps {
-         dir('realworld-cicd-pipeline-project-main/') {
+         dir('Jenkins-Realworld-CICD-Project/') {
          sh 'mvn test'
          }
         }
     }
     stage('Integration Test'){
         steps {
-         dir('realworld-cicd-pipeline-project-main/') {
+         dir('Jenkins-Realworld-CICD-Project/') {
           sh 'mvn verify -DskipUnitTests'
         }
         }
     }
     stage ('Checkstyle Code Analysis'){
         steps {
-            dir('realworld-cicd-pipeline-project-main/') {
+            dir('Jenkins-Realworld-CICD-Project/') {
             sh 'mvn checkstyle:checkstyle'
         }
         }
@@ -61,7 +61,7 @@ pipeline {
     }
     stage('SonarQube Inspection') {
         steps {
-            dir('realworld-cicd-pipeline-project-main/') {
+            dir('Jenkins-Realworld-CICD-Project/') {
             withSonarQubeEnv('SonarQube') { 
                 withCredentials([string(credentialsId: 'SonarQube-Token', variable: 'SONAR_TOKEN')]) {
                 sh """
@@ -109,7 +109,7 @@ pipeline {
             HOSTS = 'dev'
         }
         steps {
-            dir('realworld-cicd-pipeline-project-main/') {
+            dir('Jenkins-Realworld-CICD-Project/') {
             withCredentials([usernamePassword(credentialsId: 'Ansible-Credential', passwordVariable: 'PASSWORD', usernameVariable: 'USER_NAME')]) {
                 sh "ansible-playbook -i ${WORKSPACE}/ansible-config/aws_ec2.yaml ${WORKSPACE}/deploy.yaml --extra-vars \"ansible_user=$USER_NAME ansible_password=$PASSWORD hosts=tag_Environment_$HOSTS workspace_path=$WORKSPACE\""
             }
@@ -122,7 +122,7 @@ pipeline {
             HOSTS = 'stage'
         }
         steps {
-            dir('realworld-cicd-pipeline-project-main/') {
+            dir('Jenkins-Realworld-CICD-Project/') {
             withCredentials([usernamePassword(credentialsId: 'Ansible-Credential', passwordVariable: 'PASSWORD', usernameVariable: 'USER_NAME')]) {
                 sh "ansible-playbook -i ${WORKSPACE}/ansible-config/aws_ec2.yaml ${WORKSPACE}/deploy.yaml --extra-vars \"ansible_user=$USER_NAME ansible_password=$PASSWORD hosts=tag_Environment_$HOSTS workspace_path=$WORKSPACE\""
             }
@@ -139,7 +139,7 @@ pipeline {
             HOSTS = 'prod'
         }
         steps {
-           dir('realworld-cicd-pipeline-project-main/') {
+           dir('Jenkins-Realworld-CICD-Project/') {
             withCredentials([usernamePassword(credentialsId: 'Ansible-Credential', passwordVariable: 'PASSWORD', usernameVariable: 'USER_NAME')]) {
                 sh "ansible-playbook -i ${WORKSPACE}/ansible-config/aws_ec2.yaml ${WORKSPACE}/deploy.yaml --extra-vars \"ansible_user=$USER_NAME ansible_password=$PASSWORD hosts=tag_Environment_$HOSTS workspace_path=$WORKSPACE\""
             }
